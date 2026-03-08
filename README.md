@@ -16,6 +16,8 @@
   - 正文：抓取原站 `llms-full.txt`
 - 内容生成：调用大语言模型，把原文改写成儿童可理解、但保留关键步骤的中文
 - 自动更新：GitHub Actions 每天执行一次 `npm run sync`
+  - 默认先做轻量检查，只抓首页和 `llms-full.txt`
+  - 只有检测到导航或内容索引变化时，才进入全量同步和重生成
 - SEO：静态页面、canonical、sitemap、robots、可索引 URL
 
 ## 本地开发
@@ -102,7 +104,10 @@ git push
 
 - 文件：`/.github/workflows/daily-sync.yml`
 - 频率：每天 UTC 02:00 运行一次
-- 作用：抓原站最新内容，重生成 `src/generated/site-data.json`，有变化就自动提交
+- 作用：
+  - 先抓原站首页和 `llms-full.txt` 做轻量签名比对
+  - 如果首页导航和文档内容索引都没变，就直接跳过，不做全量同步
+  - 只有检测到变化时，才重生成 `src/generated/site-data.json` 并自动提交
 
 需要在 GitHub 仓库 Secrets 中配置：
 

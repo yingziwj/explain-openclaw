@@ -580,6 +580,9 @@ const writeNavTranslations = async (translations) => {
   await writeFile(navTranslationPath, `${JSON.stringify(translations, null, 2)}\n`, "utf8");
 };
 
+const createSignature = (value) =>
+  createHash("sha256").update(value).digest("hex");
+
 const mapPageTitles = (sidebar, pages) => {
   const pageMap = new Map(pages.map((page) => [page.path, page]));
 
@@ -601,6 +604,19 @@ const main = async () => {
     readExistingCache(),
     readNavTranslations()
   ]);
+
+  const homepageSignature = createSignature(homepageHtml);
+  const llmSourceSignature = createSignature(llmSourceText);
+
+  if (
+    SYNC_ONLY_PATHS.length === 0 &&
+    SYNC_FORCE_PATHS.size === 0 &&
+    existingSiteData?.homepageSignature === homepageSignature &&
+    existingSiteData?.llmSourceSignature === llmSourceSignature
+  ) {
+    console.log("No homepage or content index changes detected. Skipping full sync.");
+    return;
+  }
 
   const topNav = parseTopNav(homepageHtml, []);
   const rawPages = parsePagesFromLLMSource(llmSourceText);
@@ -775,6 +791,8 @@ const main = async () => {
   const siteData = {
     generatedAt: new Date().toISOString(),
     sourceOrigin: SOURCE_ORIGIN,
+    homepageSignature,
+    llmSourceSignature,
     firstPageSlug: finalPages[0]?.slug ?? "",
     homePagePath: resolvePagePath("/", pathToPage),
     topNav: normalizedSections.map((section) => ({
