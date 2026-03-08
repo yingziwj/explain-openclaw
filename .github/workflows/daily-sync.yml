@@ -3,7 +3,7 @@ name: Daily OpenClaw Sync
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 2 * * *"
+    - cron: "0 2 */3 * *"
 
 jobs:
   sync:

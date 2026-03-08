@@ -596,6 +596,42 @@ const mapPageTitles = (sidebar, pages) => {
   }
 };
 
+const restoreSectionsFromExistingSiteData = (existingSiteData, pageMap) => {
+  const sections = (existingSiteData?.sections ?? []).map((section) => ({
+    key: section.key,
+    label: section.label,
+    href: section.href,
+    actualPath: resolvePagePath(section.href, pageMap),
+    sidebar: (section.sidebar ?? []).map((group) => ({
+      title: group.title,
+      items: (group.items ?? [])
+        .map((item) => {
+          const actualPath = resolvePagePath(item.href, pageMap);
+          const page = pageMap.get(actualPath);
+
+          if (!page) {
+            return null;
+          }
+
+          return {
+            title: item.title,
+            href: item.href,
+            actualPath
+          };
+        })
+        .filter(Boolean)
+    })).filter((group) => group.items.length > 0)
+  })).filter((section) => section.sidebar.length > 0);
+
+  return {
+    topNav: (existingSiteData?.topNav ?? []).map((item) => ({
+      label: item.label,
+      href: item.href
+    })),
+    sections
+  };
+};
+
 const main = async () => {
   const [homepageHtml, llmSourceText, existingSiteData, existingCache, existingNavTranslations] = await Promise.all([
     fetchText(SOURCE_ORIGIN),
@@ -627,39 +663,56 @@ const main = async () => {
 
   const pageMap = new Map(rawPages.map((page) => [page.path, page]));
   const sidebarPaths = new Set();
-  const sections = [];
+  const homepageChanged = existingSiteData?.homepageSignature !== homepageSignature;
+  let sections = [];
+  let activeTopNav = topNav;
 
-  for (const item of topNav) {
-    const html = await fetchText(new URL(item.href, SOURCE_ORIGIN).toString());
-    const sidebar = parseSidebarForSection(html);
-    const normalizedSidebar = (sidebar.length > 0 ? sidebar : buildFallbackSidebar(rawPages)).map((group) => ({
-      title: group.title,
-      items: group.items
-        .map((entry) => {
-          const actualPath = resolvePagePath(entry.href, pageMap);
-          const page = pageMap.get(actualPath);
+  if (!homepageChanged && existingSiteData?.sections?.length) {
+    const restored = restoreSectionsFromExistingSiteData(existingSiteData, pageMap);
+    activeTopNav = restored.topNav;
+    sections = restored.sections;
+    console.log("Homepage navigation unchanged. Reusing stored sections without refetching section pages.");
+  } else {
+    for (const item of topNav) {
+      const html = await fetchText(new URL(item.href, SOURCE_ORIGIN).toString());
+      const sidebar = parseSidebarForSection(html);
+      const normalizedSidebar = (sidebar.length > 0 ? sidebar : buildFallbackSidebar(rawPages)).map((group) => ({
+        title: group.title,
+        items: group.items
+          .map((entry) => {
+            const actualPath = resolvePagePath(entry.href, pageMap);
+            const page = pageMap.get(actualPath);
 
-          if (!page) {
-            return null;
-          }
+            if (!page) {
+              return null;
+            }
 
-          sidebarPaths.add(actualPath);
-          return {
-            title: entry.title,
-            href: entry.href,
-            actualPath
-          };
-        })
-        .filter(Boolean)
-    })).filter((group) => group.items.length > 0);
+            sidebarPaths.add(actualPath);
+            return {
+              title: entry.title,
+              href: entry.href,
+              actualPath
+            };
+          })
+          .filter(Boolean)
+      })).filter((group) => group.items.length > 0);
 
-    sections.push({
-      key: item.href === "/" ? "get-started" : item.href.replace(/^\//, "").replace(/\//g, "-") || "root",
-      label: item.label,
-      href: item.href,
-      actualPath: resolvePagePath(item.href, pageMap),
-      sidebar: normalizedSidebar
-    });
+      sections.push({
+        key: item.href === "/" ? "get-started" : item.href.replace(/^\//, "").replace(/\//g, "-") || "root",
+        label: item.label,
+        href: item.href,
+        actualPath: resolvePagePath(item.href, pageMap),
+        sidebar: normalizedSidebar
+      });
+    }
+  }
+
+  for (const section of sections) {
+    for (const group of section.sidebar) {
+      for (const item of group.items) {
+        sidebarPaths.add(item.actualPath);
+      }
+    }
   }
 
   const pagesInSections = new Set(sections.flatMap((section) => section.sidebar.flatMap((group) => group.items.map((item) => item.actualPath))));
@@ -756,7 +809,9 @@ const main = async () => {
     }
   }
 
-  const navTranslations = await translateLabels([...navLabels], existingNavTranslations);
+  const navTranslations = homepageChanged || !existingSiteData?.sections?.length
+    ? await translateLabels([...navLabels], existingNavTranslations)
+    : { ...existingNavTranslations, ...MANUAL_TRANSLATIONS };
   const pageToSection = new Map();
 
   for (const section of sections) {
