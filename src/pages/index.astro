@@ -1,0 +1,20 @@
+---
+import { marked } from "marked";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import DocShell from "../components/DocShell.astro";
+import siteData from "../generated/site-data.json";
+
+const page = siteData.pages.find((entry) => entry.path === siteData.homePagePath) ?? siteData.pages[0];
+
+const preparedPage = {
+  ...page,
+  summaryHtml: marked.parse(page.summaryMd || "这页的简要总结正在重新生成。"),
+  explanationHtml: marked.parse(page.explanationMd || "这页的详细解释正在重新生成。")
+};
+
+const canonical = new URL("/", Astro.site).toString();
+---
+
+<BaseLayout title={`${page.title} | OpenClaw 中文解释版`} description={page.seoDescription} canonical={canonical}>
+  <DocShell page={preparedPage} siteData={siteData} currentPath="/" />
+</BaseLayout>

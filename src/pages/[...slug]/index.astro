@@ -1,0 +1,33 @@
+---
+import { marked } from "marked";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import DocShell from "../../components/DocShell.astro";
+import siteData from "../../generated/site-data.json";
+
+export function getStaticPaths() {
+  return siteData.pages.flatMap((page) => {
+    const paths = [page.path, ...(page.aliases ?? [])].filter((value) => value !== "/");
+    return paths.map((pathname) => ({
+      params: { slug: pathname.replace(/^\//, "") },
+      props: {
+        page,
+        currentPath: pathname
+      }
+    }));
+  });
+}
+
+const { page, currentPath } = Astro.props;
+
+const preparedPage = {
+  ...page,
+  summaryHtml: marked.parse(page.summaryMd || "这页的简要总结正在重新生成。"),
+  explanationHtml: marked.parse(page.explanationMd || "这页的详细解释正在重新生成。")
+};
+
+const canonical = new URL(currentPath, Astro.site).toString();
+---
+
+<BaseLayout title={`${page.title} | OpenClaw 中文解释版`} description={page.seoDescription} canonical={canonical}>
+  <DocShell page={preparedPage} siteData={siteData} currentPath={currentPath} />
+</BaseLayout>

@@ -1,0 +1,42 @@
+name: Daily OpenClaw Sync
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * *"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Regenerate content
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+          PROMPT_VERSION: v3-kid-friendly-but-complete
+          SOURCE_ORIGIN: https://docs.openclaw.ai
+        run: npm run sync
+
+      - name: Commit updated content
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/generated/site-data.json src/generated/page-cache.json src/generated/nav-translation-cache.json
+          git diff --cached --quiet || git commit -m "chore: sync OpenClaw docs"
+
+      - name: Push changes
+        run: git push

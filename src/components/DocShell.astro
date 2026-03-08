@@ -1,0 +1,75 @@
+---
+const { page, siteData, currentPath } = Astro.props;
+
+const topNav = siteData.topNav ?? [];
+const sections = siteData.sections ?? [];
+const currentSection =
+  sections.find((section) => section.key === page.sectionKey) ??
+  sections.find((section) => section.actualPath === page.path) ??
+  sections[0];
+const sidebar = currentSection?.sidebar ?? [];
+const generatedAt = new Date(siteData.generatedAt).toLocaleString("zh-CN", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit"
+});
+---
+
+<div class="page-shell">
+  <header class="topbar">
+    <a class="brand" href="/">
+      <span class="brand-mark">OC</span>
+      <div>
+        <strong>OpenClaw 中文解释版</strong>
+        <p>给五岁小朋友也能看懂的说明书</p>
+      </div>
+    </a>
+
+    <nav class="topnav" aria-label="主导航">
+      {topNav.map((item) => (
+        <a href={item.href} class={item.key === currentSection?.key ? "active" : ""}>{item.translatedLabel}</a>
+      ))}
+    </nav>
+  </header>
+
+  <div class="content-grid">
+    <aside class="sidebar" aria-label="侧边导航">
+      {sidebar.map((group) => (
+        <section class="sidebar-group">
+          <h2>{group.title}</h2>
+          <ul>
+            {group.items.map((item) => (
+              <li>
+                <a href={item.href} class={item.href === currentPath || item.actualPath === page.path ? "active" : ""}>
+                  {item.translatedTitle}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </aside>
+
+    <main class="article-wrap">
+      <div class="article-meta">
+        <a href={page.sourceUrl} target="_blank" rel="noreferrer">查看原始文档</a>
+        <span>最近生成：{generatedAt}</span>
+      </div>
+
+      <article class="article-card">
+        <header class="hero">
+          <p class="eyebrow">简要总结</p>
+          <h1>{page.title}</h1>
+          <div class="prose summary" set:html={page.summaryHtml} />
+        </header>
+
+        <section class="explanation-section">
+          <p class="eyebrow">五岁小孩版解释</p>
+          <div class="prose" set:html={page.explanationHtml} />
+        </section>
+      </article>
+    </main>
+  </div>
+</div>
