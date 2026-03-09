@@ -6,6 +6,8 @@ const {
   description = "OpenClaw 文档五岁小孩都能听懂的中文解释版。",
   canonical = "https://explain-openclaw.pages.dev/"
 } = Astro.props;
+
+const ogImage = new URL("/og-cover.svg", canonical).toString();
 ---
 
 <!doctype html>
@@ -16,13 +18,17 @@ const {
     <meta name="description" content={description} />
     <meta name="robots" content="index,follow,max-image-preview:large" />
     <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content="OpenClaw 中文解释版" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/svg+xml" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImage} />
   </head>
   <body>
     <slot />

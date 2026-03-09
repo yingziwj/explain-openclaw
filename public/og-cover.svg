@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="开心小朋友抓住小龙虾的 OpenClaw 中文解释版分享封面">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#fff5e8" />
+      <stop offset="45%" stop-color="#ffe1c2" />
+      <stop offset="100%" stop-color="#ffd0b8" />
+    </linearGradient>
+    <linearGradient id="card" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#fffdf8" />
+      <stop offset="100%" stop-color="#fff2df" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <circle cx="1110" cy="110" r="130" fill="#ffd9c3" opacity="0.75" />
+  <circle cx="118" cy="548" r="110" fill="#ffc2ad" opacity="0.6" />
+  <rect x="62" y="58" width="1076" height="514" rx="36" fill="url(#card)" opacity="0.92" />
+
+  <g transform="translate(112 110)">
+    <circle cx="122" cy="98" r="52" fill="#f2c29b" />
+    <path d="M34 292c0-63 42-112 100-112s100 49 100 112" fill="#2d7e5d" />
+    <path d="M74 195c19 18 40 27 60 27 21 0 42-9 60-27" fill="none" stroke="#1f2933" stroke-linecap="round" stroke-width="12" />
+    <circle cx="104" cy="92" r="7" fill="#1f2933" />
+    <circle cx="140" cy="92" r="7" fill="#1f2933" />
+    <path d="M104 125c11 10 25 10 36 0" fill="none" stroke="#d46c63" stroke-linecap="round" stroke-width="8" />
+
+    <g transform="translate(182 52)">
+      <path d="M92 10c63 0 116 51 116 114s-53 114-116 114c-40 0-75-18-97-47" fill="#e53935" />
+      <circle cx="111" cy="92" r="7" fill="#fff4e3" />
+      <path d="M198 70l42-31" fill="none" stroke="#e53935" stroke-linecap="round" stroke-width="12" />
+      <path d="M177 45l15-44" fill="none" stroke="#e53935" stroke-linecap="round" stroke-width="12" />
+      <path d="M194 147c43-22 72-9 70 21-28 25-65 31-98 15" fill="#e53935" />
+      <path d="M166 215c39 31 79 34 105 11-8-34-40-48-78-41" fill="#e53935" />
+      <path d="M79 112c20 9 29 29 23 48" fill="none" stroke="#fff4e3" stroke-linecap="round" stroke-width="9" />
+    </g>
+  </g>
+
+  <g transform="translate(560 150)">
+    <text x="0" y="0" fill="#c95b28" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="34" font-weight="700">
+      给五岁小朋友也能看懂的说明书
+    </text>
+    <text x="0" y="96" fill="#1f2933" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="88" font-weight="800">
+      OpenClaw 中文解释版
+    </text>
+    <text x="0" y="172" fill="#4f5d6a" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="34">
+      把复杂英文文档，讲成小朋友都能听懂的中文
+    </text>
+
+    <g transform="translate(0 238)">
+      <rect width="198" height="86" rx="24" fill="#fff1dd" stroke="#e9c7a4" />
+      <text x="28" y="52" fill="#a14e22" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="30" font-weight="700">
+        保留关键步骤
+      </text>
+    </g>
+
+    <g transform="translate(222 238)">
+      <rect width="198" height="86" rx="24" fill="#fff1dd" stroke="#e9c7a4" />
+      <text x="28" y="52" fill="#a14e22" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="30" font-weight="700">
+        自动同步更新
+      </text>
+    </g>
+
+    <g transform="translate(444 238)">
+      <rect width="198" height="86" rx="24" fill="#fff1dd" stroke="#e9c7a4" />
+      <text x="42" y="52" fill="#a14e22" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="30" font-weight="700">
+        Cloudflare 部署
+      </text>
+    </g>
+  </g>
+</svg>
