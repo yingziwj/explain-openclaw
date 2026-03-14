@@ -7,7 +7,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "sync": "node ./scripts/sync-docs.mjs"
+    "sync": "node ./scripts/sync-docs.mjs",
+    "audit:content": "node ./scripts/audit-content.mjs",
+    "sync:high-risk": "node ./scripts/sync-audit-high-risk.mjs"
   },
   "dependencies": {
     "astro": "^5.4.2",

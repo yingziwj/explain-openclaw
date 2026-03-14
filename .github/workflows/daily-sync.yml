@@ -27,7 +27,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
           OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
-          PROMPT_VERSION: v3-kid-friendly-but-complete
+          PROMPT_VERSION: v4-kid-friendly-complete-command-safe
           SOURCE_ORIGIN: https://docs.openclaw.ai
         run: npm run sync
 

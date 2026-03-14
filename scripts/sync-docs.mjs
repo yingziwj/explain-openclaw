@@ -17,7 +17,7 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_BASE_URL = process.env.OPENAI_BASE_URL || "https://api.openai.com/v1";
 const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
 const SYNC_CONCURRENCY = Number(process.env.SYNC_CONCURRENCY || "3");
-const PROMPT_VERSION = process.env.PROMPT_VERSION || "v3-kid-friendly-but-complete";
+const PROMPT_VERSION = process.env.PROMPT_VERSION || "v4-kid-friendly-complete-command-safe";
 const SYNC_ONLY_PATHS = (process.env.SYNC_ONLY_PATHS || "")
   .split(",")
   .map((value) => value.trim())
@@ -383,7 +383,72 @@ const parseGeneratedContent = (value) => {
   }
 };
 
-const createPrompt = (page) => `
+const extractInlineCode = (value) => {
+  const matches = value.match(/`([^`\n]+)`/g) || [];
+  return matches.map((item) => item.slice(1, -1).trim()).filter(Boolean);
+};
+
+const extractFencedCodeLines = (value) => {
+  const blocks = [...value.matchAll(/```[^\n]*\n([\s\S]*?)```/g)];
+  return blocks.flatMap((match) => match[1].split("\n").map((line) => line.trim()).filter(Boolean));
+};
+
+const isCommandLike = (value) => {
+  if (!value || /^https?:\/\//.test(value) || /^\//.test(value)) {
+    return false;
+  }
+
+  if (!/\s/.test(value) && !/^openclaw\b/.test(value)) {
+    return false;
+  }
+
+  return /^(openclaw|curl|iwr|npm|pnpm|yarn|node|npx|docker|brew|uv|python|pip|git|ssh)\b/.test(value);
+};
+
+const extractRepresentativeCommands = (value) => [...new Set(
+  [...extractInlineCode(value), ...extractFencedCodeLines(value)]
+    .map((item) => item.replace(/\s+/g, " ").trim())
+    .filter(isCommandLike)
+)].slice(0, 8);
+
+const classifyPage = (page) => {
+  const source = page.sourceMarkdown || "";
+  const commands = extractRepresentativeCommands(source);
+  const proceduralSignals = (source.match(/<Step\b|<Steps>|^\s*##\s+|^\s*\d+\.\s+/gm) || []).length;
+  const isCliHeavy = /^\/cli\//.test(page.path) || /CLI|command/i.test(page.title);
+  const isCommandHeavy = commands.length >= 4 || isCliHeavy;
+  const isTutorial = proceduralSignals >= 5 || /(install|setup|wizard|getting started|pairing|troubleshooting|onboarding|cron|webhook)/i.test(page.path + " " + page.title);
+
+  return {
+    commands,
+    isCliHeavy,
+    isCommandHeavy,
+    isTutorial
+  };
+};
+
+const createPrompt = (page) => {
+  const pageTraits = classifyPage(page);
+  const extraRules = [];
+
+  if (pageTraits.isTutorial) {
+    extraRules.push("这是教程页。解释版必须用编号步骤保留主流程，至少覆盖准备、执行、检查结果、出错时注意什么。");
+  }
+
+  if (pageTraits.isCommandHeavy) {
+    extraRules.push("这是命令密集页。解释版里必须保留最重要的代表性命令，不能只讲概念不写命令。");
+    extraRules.push("如果原文给了多个命令示例，至少保留其中最关键的 3 到 6 条，并说明各自是做什么的。");
+  }
+
+  if (pageTraits.isCliHeavy) {
+    extraRules.push("这是 CLI/参考页。先说这个命令像什么，再按常见用法、常用子命令、容易出错点来讲。");
+  }
+
+  const representativeCommands = pageTraits.commands.length > 0
+    ? `\n本页抽出的代表性命令，请尽量保留并解释用途：\n${pageTraits.commands.map((command, index) => `${index + 1}. ${command}`).join("\n")}\n`
+    : "";
+
+  return `
 你是一个儿童说明书改写助手。请根据下面的原始文档内容，用简体中文输出固定标签格式。
 
 目标：
@@ -399,6 +464,11 @@ const createPrompt = (page) => `
 10. 可以用“像……一样”“你可以把它想成……”这样的比喻来帮助理解。
 11. 讲步骤时，句子要短，先说“要做什么”，再说“怎么做”。
 12. 不要输出代码块，不要输出解释说明，不要输出标签以外的额外文字。
+13. 如果页面里有命令或配置项，解释时要明确告诉读者“什么时候用它、为什么用它”。
+14. 对命令密集页，宁可多保留关键命令，也不要只保留口语化概括。
+
+本页额外要求：
+${extraRules.length > 0 ? extraRules.map((rule, index) => `${index + 1}. ${rule}`).join("\n") : "1. 正常按通用规则处理。"}
 
 输出格式必须严格如下：
 [[[SUMMARY]]]
@@ -413,6 +483,7 @@ const createPrompt = (page) => `
 - 每一步都用五岁小孩能听懂的话重说，不要只把原文直接翻译成正式中文。
 - 可以先用一句话解释“这一步是在做什么”，再写具体动作。
 - 如果某一步容易出错，要像提醒小朋友一样说清楚“这里要小心什么”。
+- 如果本页命令很多，要单独列出“最常用的命令小抄”，并逐条解释它们是干什么的。
 - 总字数尽量控制在 900 字以内，但宁可稍长，也不要漏掉重要步骤。
 [[[/EXPLANATION]]]
 [[[SEO]]]
@@ -421,10 +492,12 @@ const createPrompt = (page) => `
 
 页面标题：${page.title}
 页面地址：${page.sourceUrl}
+${representativeCommands}
 
 原始内容：
 ${page.sourceMarkdown}
 `.trim();
+};
 
 const requestModelText = async (prompt) => {
   const response = await fetch(`${OPENAI_BASE_URL}/responses`, {
@@ -436,7 +509,7 @@ const requestModelText = async (prompt) => {
     body: JSON.stringify({
       model: OPENAI_MODEL,
       input: prompt,
-      max_output_tokens: 2600
+      max_output_tokens: 3200
     })
   });
 
@@ -462,7 +535,7 @@ const requestModelText = async (prompt) => {
     },
     body: JSON.stringify({
       model: OPENAI_MODEL,
-      max_tokens: 2600,
+      max_tokens: 3200,
       messages: [
         {
           role: "user",

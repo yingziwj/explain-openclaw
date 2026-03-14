@@ -15,6 +15,22 @@ const generatedAt = new Date(siteData.generatedAt).toLocaleString("zh-CN", {
   hour: "2-digit",
   minute: "2-digit"
 });
+const stripMarkdown = (value) => (value || "")
+  .replace(/```[\s\S]*?```/g, " ")
+  .replace(/`[^`]+`/g, " ")
+  .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+  .replace(/<[^>]+>/g, " ")
+  .replace(/[*_#>-]/g, " ")
+  .replace(/\s+/g, " ")
+  .trim();
+const searchIndex = siteData.pages.map((entry) => ({
+  title: entry.title,
+  path: entry.path,
+  summary: stripMarkdown(entry.summaryMd).slice(0, 96),
+  description: entry.seoDescription || "",
+  keywords: [entry.title, entry.path, ...(entry.aliases ?? []), stripMarkdown(entry.summaryMd).slice(0, 160)].join(" ").toLowerCase()
+}));
+const showAdPlaceholders = import.meta.env.PUBLIC_ENABLE_AD_PLACEHOLDERS === "true";
 ---
 
 <div class="page-shell">
@@ -26,6 +42,15 @@ const generatedAt = new Date(siteData.generatedAt).toLocaleString("zh-CN", {
         <p>给五岁小朋友也能看懂的说明书</p>
       </div>
     </a>
+
+    <div class="search-box" data-search-root>
+      <label class="search-label" for="doc-search">搜索内容</label>
+      <input id="doc-search" type="search" placeholder="搜标题、路径、关键词" autocomplete="off" data-search-input />
+      <div class="search-results" data-search-results hidden>
+        <p class="search-empty" data-search-empty>输入关键词开始搜索</p>
+        <ul data-search-list></ul>
+      </div>
+    </div>
 
     <nav class="topnav" aria-label="主导航">
       {topNav.map((item) => (
@@ -50,6 +75,14 @@ const generatedAt = new Date(siteData.generatedAt).toLocaleString("zh-CN", {
           </ul>
         </section>
       ))}
+
+      {showAdPlaceholders && (
+        <section class="ad-slot ad-slot-sidebar" aria-label="侧边广告位预留">
+          <p class="ad-slot-label">预留广告位</p>
+          <strong>侧边栏 300 x 250</strong>
+          <span>后续可接 Google AdSense，不影响目录阅读。</span>
+        </section>
+      )}
     </aside>
 
     <main class="article-wrap">
@@ -69,7 +102,89 @@ const generatedAt = new Date(siteData.generatedAt).toLocaleString("zh-CN", {
           <p class="eyebrow">五岁小孩版解释</p>
           <div class="prose" set:html={page.explanationHtml} />
         </section>
+
+        {showAdPlaceholders && (
+          <section class="ad-slot ad-slot-inline" aria-label="正文中段广告位预留">
+            <p class="ad-slot-label">预留广告位</p>
+            <strong>正文中段响应式广告</strong>
+            <span>建议放在阅读节奏自然停顿的位置，后续再接真实广告代码。</span>
+          </section>
+        )}
+
+        {showAdPlaceholders && (
+          <section class="ad-slot ad-slot-footer" aria-label="正文底部广告位预留">
+            <p class="ad-slot-label">预留广告位</p>
+            <strong>文末 728 x 90 / 移动端自适应</strong>
+            <span>适合放在文章读完之后，不抢首屏注意力。</span>
+          </section>
+        )}
       </article>
     </main>
   </div>
 </div>
+
+<script is:inline define:vars={{ searchIndex }}>
+  const root = document.querySelector("[data-search-root]");
+  const input = root?.querySelector("[data-search-input]");
+  const results = root?.querySelector("[data-search-results]");
+  const list = root?.querySelector("[data-search-list]");
+  const empty = root?.querySelector("[data-search-empty]");
+
+  const renderResults = (items, query) => {
+    if (!list || !empty || !results) {
+      return;
+    }
+
+    if (!query) {
+      list.innerHTML = "";
+      empty.textContent = "输入关键词开始搜索";
+      results.hidden = true;
+      return;
+    }
+
+    results.hidden = false;
+
+    if (items.length === 0) {
+      list.innerHTML = "";
+      empty.textContent = "没有找到匹配页面";
+      return;
+    }
+
+    empty.textContent = "";
+    list.innerHTML = items.map((item) => `
+      <li>
+        <a href="${item.path}">
+          <strong>${item.title}</strong>
+          <span>${item.path}</span>
+          <p>${item.summary || item.description || "打开这页查看详细解释"}</p>
+        </a>
+      </li>
+    `).join("");
+  };
+
+  input?.addEventListener("input", (event) => {
+    const query = event.target.value.trim().toLowerCase();
+    if (!query) {
+      renderResults([], "");
+      return;
+    }
+
+    const matches = searchIndex
+      .filter((item) => item.keywords.includes(query))
+      .slice(0, 8);
+
+    renderResults(matches, query);
+  });
+
+  input?.addEventListener("focus", () => {
+    if (input.value.trim()) {
+      results.hidden = false;
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!root?.contains(event.target)) {
+      results.hidden = true;
+    }
+  });
+</script>

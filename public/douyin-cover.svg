@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" role="img" aria-label="explain-openclaw 抖音封面">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#fff7ef" />
+      <stop offset="38%" stop-color="#ffd4b8" />
+      <stop offset="100%" stop-color="#ffb39d" />
+    </linearGradient>
+    <linearGradient id="titleGlow" x1="0" x2="1">
+      <stop offset="0%" stop-color="#ff6a3d" />
+      <stop offset="100%" stop-color="#d92a20" />
+    </linearGradient>
+    <linearGradient id="urlBar" x1="0" x2="1">
+      <stop offset="0%" stop-color="#1d1d1f" />
+      <stop offset="100%" stop-color="#34343a" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="20" stdDeviation="26" flood-color="#ac5536" flood-opacity="0.22" />
+    </filter>
+  </defs>
+
+  <rect width="1080" height="1920" fill="url(#bg)" />
+  <circle cx="918" cy="208" r="186" fill="#ffe7a9" opacity="0.55" />
+  <circle cx="170" cy="1688" r="164" fill="#ffc8b5" opacity="0.6" />
+  <circle cx="975" cy="1558" r="126" fill="#ffd7c1" opacity="0.55" />
+
+  <g transform="translate(70 72)">
+    <rect x="0" y="0" width="940" height="1776" rx="54" fill="#fffaf5" opacity="0.94" filter="url(#shadow)" />
+
+    <g transform="translate(68 62)">
+      <rect x="0" y="0" width="252" height="60" rx="30" fill="#17171a" />
+      <text x="28" y="39" fill="#fffaf1" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="30" font-weight="800">抖音项目封面</text>
+
+      <g transform="translate(0 114)">
+        <circle cx="118" cy="110" r="52" fill="#f2c29b" />
+        <path d="M38 302c0-64 41-115 98-115s98 51 98 115" fill="#2b7a5b" />
+        <path d="M74 192c18 16 39 24 60 24 21 0 42-8 60-24" fill="none" stroke="#1f2933" stroke-linecap="round" stroke-width="11" />
+        <circle cx="98" cy="103" r="6.5" fill="#1f2933" />
+        <circle cx="136" cy="103" r="6.5" fill="#1f2933" />
+        <path d="M99 133c10 8 27 8 37 0" fill="none" stroke="#d3685a" stroke-linecap="round" stroke-width="6.5" />
+
+        <g transform="translate(168 46)">
+          <path d="M95 12c67 0 122 54 122 121S162 254 95 254c-43 0-79-19-102-50" fill="#e53935" />
+          <circle cx="115" cy="98" r="7" fill="#fff5e7" />
+          <path d="M206 74l42-33" fill="none" stroke="#e53935" stroke-linecap="round" stroke-width="12" />
+          <path d="M185 46l15-45" fill="none" stroke="#e53935" stroke-linecap="round" stroke-width="12" />
+          <path d="M204 152c44-23 74-9 72 21-28 25-66 31-100 15" fill="#e53935" />
+          <path d="M174 228c40 31 82 34 109 11-8-35-42-49-81-41" fill="#e53935" />
+          <path d="M81 118c20 9 30 30 24 49" fill="none" stroke="#fff5e7" stroke-linecap="round" stroke-width="9" />
+        </g>
+      </g>
+
+      <text x="0" y="590" fill="#b74e1f" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="34" font-weight="800">我把 OpenClaw 官网文档</text>
+      <text x="0" y="700" fill="url(#titleGlow)" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="116" font-weight="900">做成了</text>
+      <text x="0" y="820" fill="#1f2933" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="110" font-weight="900">五岁小孩</text>
+      <text x="0" y="940" fill="#1f2933" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="110" font-weight="900">也能看懂的</text>
+      <text x="0" y="1060" fill="url(#titleGlow)" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="110" font-weight="900">中文网站</text>
+
+      <g transform="translate(0 1120)">
+        <rect x="0" y="0" width="804" height="122" rx="30" fill="#fff0e3" stroke="#efc7ab" />
+        <text x="34" y="50" fill="#a24a1e" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="34" font-weight="800">保留原站导航</text>
+        <text x="34" y="94" fill="#4f5d69" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="30">总结 + 儿童解释 + 关键步骤不省略</text>
+      </g>
+
+      <g transform="translate(0 1276)">
+        <rect x="0" y="0" width="804" height="122" rx="30" fill="#fff0e3" stroke="#efc7ab" />
+        <text x="34" y="50" fill="#a24a1e" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="34" font-weight="800">免费部署到 Cloudflare</text>
+        <text x="34" y="94" fill="#4f5d69" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="30">还能自动同步官网更新，兼顾 SEO</text>
+      </g>
+
+      <g transform="translate(0 1456)">
+        <rect x="0" y="0" width="804" height="156" rx="34" fill="url(#urlBar)" />
+        <text x="34" y="58" fill="#ffcf8f" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="32" font-weight="800">网站地址</text>
+        <text x="34" y="114" fill="#fff8ef" font-family="'JetBrains Mono','SFMono-Regular',monospace" font-size="34" font-weight="700">https://explain-openclaw.pages.dev</text>
+      </g>
+    </g>
+  </g>
+</svg>

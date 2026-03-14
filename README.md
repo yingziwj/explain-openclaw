@@ -15,6 +15,7 @@
   - 导航：抓取原站顶部导航和各栏目侧边导航结构
   - 正文：抓取原站 `llms-full.txt`
 - 内容生成：调用大语言模型，把原文改写成儿童可理解、但保留关键步骤的中文
+- 内容抽检：`scripts/audit-content.mjs` 会检查正文过短、关键命令缺失、步骤感不足、总结重复等问题
 - 自动更新：GitHub Actions 每 3 天执行一次 `npm run sync`
   - 默认先做轻量检查，只抓首页和 `llms-full.txt`
   - 如果首页没变，就直接复用现有导航结构，不再抓各栏目页
@@ -34,7 +35,7 @@ npm run dev
 export OPENAI_API_KEY=your_key
 export OPENAI_MODEL=deepseek-chat
 export OPENAI_BASE_URL=https://api.deepseek.com
-export PROMPT_VERSION=v3-kid-friendly-but-complete
+export PROMPT_VERSION=v4-kid-friendly-complete-command-safe
 npm run sync
 ```
 
@@ -44,14 +45,32 @@ npm run sync
 npm run build
 ```
 
+如果要做内容质量抽检：
+
+```bash
+npm run audit:content
+```
+
+抽检结果会输出到 `reports/content-audit.md`。
+
+如果要根据抽检报告只重跑高风险页面：
+
+```bash
+npm run sync:high-risk
+```
+
+默认会读取 `reports/content-audit.md` 里前 20 个高风险页面，并强制重生成。
+
 ## 环境变量
 
 - `OPENAI_API_KEY`：必填，用于生成儿童版中文内容
 - `OPENAI_MODEL`：推荐 `deepseek-chat`
 - `OPENAI_BASE_URL`：推荐 `https://api.deepseek.com`
-- `PROMPT_VERSION`：推荐 `v3-kid-friendly-but-complete`
+- `PROMPT_VERSION`：推荐 `v4-kid-friendly-complete-command-safe`
 - `SOURCE_ORIGIN`：可选，默认 `https://docs.openclaw.ai`
 - `SITE_URL`：可选，默认 `https://explain-openclaw.pages.dev`
+- `PUBLIC_ENABLE_AD_PLACEHOLDERS`：可选，设为 `true` 时会显示预留广告位框，不会插入真实广告脚本
+- `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN`：可选，填写后会自动加载 Cloudflare Web Analytics 统计脚本
 
 ## Cloudflare Pages 部署
 
@@ -65,7 +84,8 @@ npm run build
    - `OPENAI_API_KEY=你的 DeepSeek key`
    - `OPENAI_MODEL=deepseek-chat`
    - `OPENAI_BASE_URL=https://api.deepseek.com`
-   - `PROMPT_VERSION=v3-kid-friendly-but-complete`
+   - `PROMPT_VERSION=v4-kid-friendly-complete-command-safe`
+   - `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=你的 Cloudflare Web Analytics Token`
 
 ## Git 提交流程
 
@@ -116,9 +136,16 @@ git push
 - `OPENAI_API_KEY`
 - `OPENAI_MODEL=deepseek-chat`
 - `OPENAI_BASE_URL=https://api.deepseek.com`
-- `PROMPT_VERSION=v3-kid-friendly-but-complete`
+- `PROMPT_VERSION=v4-kid-friendly-complete-command-safe`
 
 Cloudflare Pages 连接 GitHub 后，新的 commit 会自动重新部署。
+
+如果你要看访问数据，推荐直接启用 Cloudflare Web Analytics：
+
+1. 在 Cloudflare 项目里打开 Web Analytics。
+2. 复制站点对应的 token。
+3. 把它填到 `PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN`。
+4. 重新部署后，页面底部会自动注入 Cloudflare 的统计脚本。
 
 每日同步现在会一起提交这些生成文件：
 
@@ -131,6 +158,7 @@ Cloudflare Pages 连接 GitHub 后，新的 commit 会自动重新部署。
 项目已经预留了：
 
 - `/ads.txt`
+- 可开关的正文中段、文末、侧边栏广告位容器
 - 干净的静态 HTML 结构
 - 适合继续补充文章描述、结构化数据和广告位容器
 

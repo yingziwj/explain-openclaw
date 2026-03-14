@@ -4,10 +4,13 @@ import "../styles/global.css";
 const {
   title = "OpenClaw 中文解释版",
   description = "OpenClaw 文档五岁小孩都能听懂的中文解释版。",
-  canonical = "https://explain-openclaw.pages.dev/"
+  canonical = "https://explain-openclaw.pages.dev/",
+  jsonLd = []
 } = Astro.props;
 
 const ogImage = new URL("/og-cover.svg", canonical).toString();
+const schemaBlocks = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
+const cloudflareAnalyticsToken = import.meta.env.PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN;
 ---
 
 <!doctype html>
@@ -17,10 +20,13 @@ const ogImage = new URL("/og-cover.svg", canonical).toString();
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="robots" content="index,follow,max-image-preview:large" />
+    <meta name="theme-color" content="#fff3e0" />
     <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="zh-CN" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="zh_CN" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
@@ -28,9 +34,21 @@ const ogImage = new URL("/og-cover.svg", canonical).toString();
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:type" content="image/svg+xml" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    {schemaBlocks.filter(Boolean).map((entry) => (
+      <script type="application/ld+json" set:html={JSON.stringify(entry)} />
+    ))}
   </head>
   <body>
     <slot />
+    {cloudflareAnalyticsToken && (
+      <script
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={JSON.stringify({ token: cloudflareAnalyticsToken })}
+      />
+    )}
   </body>
 </html>
